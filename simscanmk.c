@@ -1,6 +1,6 @@
 /*
- * $Id: simscanmk.c,v 1.9 2005/09/27 18:14:58 kbo Exp $
- * Copyright (C) 2004-2005 Inter7 Internet Technologies, Inc.
+ * simscanmk.c v1.10 04-Jan-2015
+ * Original Copyright (C) 2004-2005 Inter7 Internet Technologies, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA
  */
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -41,7 +42,6 @@
 #include "cdb/buffer.h"
 
 static struct cdb_make c;
-
 
 #define MAX_KEY 40
 #define MAX_DATA 40
@@ -130,7 +130,7 @@ int make_version_cdb() {
   int fnd_patvers;
 #endif
 
-  if ( (fdout = open(CdbTmpFile, O_CREAT | O_TRUNC | O_WRONLY)) < 0) {
+  if ( (fdout = open(CdbTmpFile, O_CREAT | O_TRUNC | O_WRONLY, (S_IRUSR|S_IWUSR))) < 0) {
     printf("error on open tmp file\n");
     return(-1);
   }
@@ -376,7 +376,7 @@ int make_cdb()
     return(-1);
   }
  
-  if ( (fdout = open(CdbTmpFile, O_CREAT | O_TRUNC | O_WRONLY)) < 0) {
+  if ( (fdout = open(CdbTmpFile, O_CREAT | O_TRUNC | O_WRONLY, (S_IRUSR|S_IWUSR))) < 0) {
      printf("error on open tmp file\n");
     return(-1);
   }
