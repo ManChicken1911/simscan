@@ -30,13 +30,13 @@
 /* enable drop message */
 #undef ENABLE_DROPMSG
 
-/* enable dspam scanning */
+/* enable DSPAM scanning */
 #undef ENABLE_DSPAM
 
 /* dspam --user user@domain option. */
 #undef ENABLE_DSPAM_USER
 
-/* enable per domain checking */
+/* enable per-domain checking */
 #undef ENABLE_PER_DOMAIN
 
 /* enable received header */
@@ -45,7 +45,7 @@
 /* enable regex scanner */
 #undef ENABLE_REGEX
 
-/* enable spam scanning */
+/* enable spamc scanning */
 #undef ENABLE_SPAM
 
 /* spamc -u user@domain option. */
@@ -107,6 +107,9 @@
 
 /* Define to the one symbol short name of this package. */
 #undef PACKAGE_TARNAME
+
+/* Define to the home page for this package. */
+#undef PACKAGE_URL
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION

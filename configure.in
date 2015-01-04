@@ -16,7 +16,7 @@ then
 fi
 
 #----------------------------------------------------------------------
-AC_ARG_ENABLE(user, [  --enable-user=<user> Change the user for simscan.  Default: simscan.],
+AC_ARG_ENABLE(user, [  --enable-user=<user>             change the user for simscan (default=simscan)],
 	ENABLE_USER="$enableval",
 	[
 		ENABLE_USER="simscan"
@@ -47,7 +47,7 @@ AC_SUBST(ENABLE_USER)
 VIRUSSCANNER=0
 DO_RIPMIME=0
 
-AC_ARG_ENABLE(clamav, [  --enable-clamav=y|n   Turn on clamav scanning. default yes.],
+AC_ARG_ENABLE(clamav, [  --enable-clamav=y|n              turn on ClamAV scanning (default=yes)],
     ENABLE_CLAMAV="$enableval",
     [
       ENABLE_CLAMAV=yes
@@ -72,7 +72,7 @@ case $ENABLE_CLAMAV in
         done
         
         AC_ARG_ENABLE(clamdscan,
-            [  --enable-clamdscan=PATH   Full path to clamdscan program.],
+            [  --enable-clamdscan=PATH          full path to clamdscan program],
             clamdscan="$enableval",
             [
                 if test "$clamdscan" = ""
@@ -93,7 +93,7 @@ esac
 
 #----------------------------------------------------------------------
 
-AC_ARG_ENABLE(custom-smtp-reject, [  --enable-custom-smtp-reject=y|n   Return smtp reject message with virus name.],
+AC_ARG_ENABLE(custom-smtp-reject, [  --enable-custom-smtp-reject=y|n  SMTP reject message with virus name/spam outcome (default=no)],
     ENABLE_CUSTOM_SMTP_REJECT="$enableval",
     [
       ENABLE_CUSTOM_SMTP_REJECT=no
@@ -110,7 +110,7 @@ esac
 
 #----------------------------------------------------------------------
 
-AC_ARG_ENABLE(per-domain, [  --enable-per-domain=y|n   Turn on per domain based checking.],
+AC_ARG_ENABLE(per-domain, [  --enable-per-domain=y|n          turn on per-domain based checking (default=no)],
     ENABLE_PER_DOMAIN="$enableval",
     [
       ENABLE_PER_DOMAIN=no
@@ -118,7 +118,7 @@ AC_ARG_ENABLE(per-domain, [  --enable-per-domain=y|n   Turn on per domain based 
 case $ENABLE_PER_DOMAIN in
 1*|y*|Y*)
         ENABLE_PER_DOMAIN=1
-        AC_DEFINE([ENABLE_PER_DOMAIN], [], [enable per domain checking])
+        AC_DEFINE([ENABLE_PER_DOMAIN], [], [enable per-domain checking])
         ;;
 *)
         ENABLE_PER_DOMAIN=0
@@ -127,7 +127,7 @@ esac
 
 #----------------------------------------------------------------------
 
-AC_ARG_ENABLE(attach, [  --enable-attach=y|n   Turn on attachment scanning. default no.],
+AC_ARG_ENABLE(attach, [  --enable-attach=y|n              turn on attachment scanning (default=no)],
     ENABLE_ATTACH="$enableval",
     [
       ENABLE_ATTACH=no
@@ -146,7 +146,7 @@ esac
 
 #----------------------------------------------------------------------
 
-AC_ARG_ENABLE(dropmsg, [  --enable-dropmsg=y|n   Drop message in case of virus/spam found. Don't return error to sender.],
+AC_ARG_ENABLE(dropmsg, [  --enable-dropmsg=y|n             drop message if virus/spam found, don't return error to sender (default=no)],
     ENABLE_DROPMSG="$enableval",
     [
       ENABLE_DROPMSG=no
@@ -163,7 +163,7 @@ esac
 
 #----------------------------------------------------------------------
 
-AC_ARG_ENABLE(dspam, [  --enable-dspam=y|n   Turn on dspam scanning. default no.],
+AC_ARG_ENABLE(dspam, [  --enable-dspam=y|n               turn on DSPAM scanning (default=no)],
     ENABLE_DSPAM="$enableval",
     [
       ENABLE_DSPAM=no
@@ -171,7 +171,7 @@ AC_ARG_ENABLE(dspam, [  --enable-dspam=y|n   Turn on dspam scanning. default no.
 case $ENABLE_DSPAM in
 1*|y*|Y*)
         ENABLE_DSPAM=1
-        AC_DEFINE_UNQUOTED([ENABLE_DSPAM], $ENABLE_DSPAM, [enable dspam scanning])
+        AC_DEFINE_UNQUOTED([ENABLE_DSPAM], $ENABLE_DSPAM, [enable DSPAM scanning])
         ;;
 *)
         ENABLE_DSPAM=0
@@ -181,7 +181,7 @@ esac
 case $ENABLE_DSPAM in
   1*|y*|Y*)
 
-    AC_ARG_ENABLE(spam-passthru, [  --enable-spam-passthru=y|n   Pass spam email thru or reject (default disable, reject).],
+    AC_ARG_ENABLE(spam-passthru, [  --enable-spam-passthru=y|n       deliver spam to user anyway (default=no)],
         ENABLE_SPAM_PASSTHRU="$enableval",
         [
           ENABLE_SPAM_PASSTHRU=no
@@ -214,7 +214,7 @@ case $ENABLE_DSPAM in
         fi
     done
 
-    AC_ARG_ENABLE(dspam-user, [  --enable-dspam-user=y|n   Set user option to spamc.],
+    AC_ARG_ENABLE(dspam-user, [  --enable-dspam-user=y|n          set user option to DSPAM],
         ENABLE_DSPAM_USER="$enableval",
         [
           ENABLE_DSPAM_USER=no
@@ -230,7 +230,7 @@ case $ENABLE_DSPAM in
     esac
 
     AC_ARG_ENABLE(dspam-path,
-        [  --enable-dspam-path=PATH   Full path to spamc program.],
+        [  --enable-dspam-path=PATH         full path to dspam binary],
         dspam="$enableval",
         [
         if test "$dspam" = ""
@@ -243,7 +243,7 @@ case $ENABLE_DSPAM in
     AC_MSG_RESULT(yes)
     AC_DEFINE_UNQUOTED(DSPAM,"$dspam","dspam program")
 
-    AC_ARG_ENABLE(dspam-args, [  --enable-dspam-args="args" Override the default dspam arguments.],
+    AC_ARG_ENABLE(dspam-args, [  --enable-dspam-args="args"       override the default DSPAM arguments (currently does nothing)],
         ENABLE_DSPAM_ARGS="$enableval",
         [
                 ENABLE_DSPAM_ARGS=""
@@ -255,7 +255,7 @@ esac
 
 #----------------------------------------------------------------------
 
-AC_ARG_ENABLE(spam, [  --enable-spam=y|n   Turn on spam scanning. default no.],
+AC_ARG_ENABLE(spam, [  --enable-spam=y|n                turn on SpamAssassin (spamc) scanning (default=no)],
     ENABLE_SPAM="$enableval",
     [
       ENABLE_SPAM=no
@@ -263,7 +263,7 @@ AC_ARG_ENABLE(spam, [  --enable-spam=y|n   Turn on spam scanning. default no.],
 case $ENABLE_SPAM in
 1*|y*|Y*)
         ENABLE_SPAM=1
-        AC_DEFINE_UNQUOTED([ENABLE_SPAM], $ENABLE_SPAM, [enable spam scanning])
+        AC_DEFINE_UNQUOTED([ENABLE_SPAM], $ENABLE_SPAM, [enable spamc scanning])
         ;;
 *)
         ENABLE_SPAM=0
@@ -273,7 +273,7 @@ esac
 case $ENABLE_SPAM in
   1*|y*|Y*)
 
-    AC_ARG_ENABLE(spam-passthru, [  --enable-spam-passthru=y|n   Pass spam email thru or reject (default disable, reject).],
+    AC_ARG_ENABLE(spam-passthru, [  --enable-spam-passthru=y|n       deliver spam to user anyway (default=no)],
         ENABLE_SPAM_PASSTHRU="$enableval",
         [
           ENABLE_SPAM_PASSTHRU=no
@@ -288,7 +288,7 @@ case $ENABLE_SPAM in
             ;;
     esac
 
-    AC_ARG_ENABLE(spamc-user, [  --enable-spamc-user=y|n   Set user option to spamc.],
+    AC_ARG_ENABLE(spamc-user, [  --enable-spamc-user=y|n          set user option to spamc],
         ENABLE_SPAMC_USER="$enableval",
         [
           ENABLE_SPAMC_USER=no
@@ -303,7 +303,7 @@ case $ENABLE_SPAM in
             ;;
     esac
 
-    AC_ARG_ENABLE(spam-auth-user, [  --enable-spam-auth-user=y|n   Turn on spam scanning for authenticated users (default no).],
+    AC_ARG_ENABLE(spam-auth-user, [  --enable-spam-auth-user=y|n      turn on spam scanning for authenticated users (default=no)],
         ENABLE_SPAM_AUTH_USER="$enableval",
         [
           ENABLE_SPAM_AUTH_USER=no
@@ -319,7 +319,7 @@ case $ENABLE_SPAM in
     esac
 
     spamhits=""
-    AC_ARG_ENABLE(spam-hits, [  --enable-spam-hits=number   Reject spam above this hit level. default 10.0],
+    AC_ARG_ENABLE(spam-hits, [  --enable-spam-hits=number        reject spam above this hit level (default=10.0)],
     ENABLE_SPAM_HITS="$enableval",
     [
       ENABLE_SPAM_HITS="no"
@@ -350,7 +350,7 @@ case $ENABLE_SPAM in
         fi
     done
     AC_ARG_ENABLE(spamc,
-        [  --enable-spamc=PATH   Full path to spamc program.],
+        [  --enable-spamc=PATH              full path to spamc binary],
         spamc="$enableval",
         [
         if test "$spamc" = ""
@@ -363,7 +363,7 @@ case $ENABLE_SPAM in
     AC_MSG_RESULT(yes)
     AC_DEFINE_UNQUOTED(SPAMC,"$spamc","spamc program")
 
-    AC_ARG_ENABLE(spamc-args, [  --enable-spamc-args="args" Override the default spamc arguments.],
+    AC_ARG_ENABLE(spamc-args, [  --enable-spamc-args="args"       override the default spamc arguments],
 	ENABLE_SPAMC_ARGS="$enableval",
 	[
 		ENABLE_SPAMC_ARGS=""
@@ -385,7 +385,7 @@ do
 done
 
 AC_ARG_ENABLE(qmaildir,
-    [  --enable-qmaildir=DIR      Base qmail directory [/var/qmail].],
+    [  --enable-qmaildir=DIR            base qmail directory (default=/var/qmail)],
     qmaildir="$enableval",
     [
         if test "$qmaildir" = ""
@@ -406,7 +406,7 @@ AC_MSG_CHECKING(setting the work directory)
 
 workdir="$qmaildir/simscan"
 AC_ARG_ENABLE(workdir,
-    [  --enable-workdir=DIR      Directory to unpack emails [/var/qmail/simscan].],
+    [  --enable-workdir=DIR             directory to unpack emails (default=/var/qmail/simscan)],
     workdir="$enableval",
     [
         if test "$workdir" = ""
@@ -427,7 +427,7 @@ AC_MSG_CHECKING(setting the control directory)
 
 controldir="$qmaildir/control"
 AC_ARG_ENABLE(controldir,
-    [  --enable-controldir=DIR      Directory to place control files [/var/qmail/control].],
+    [  --enable-controldir=DIR          directory to place control files (default=/var/qmail/control)],
     controldir="$enableval",
     [
         if test "$controldir" = ""
@@ -444,7 +444,7 @@ AC_MSG_RESULT(done)
 #----------------------------------------------------------------------
 
 AC_ARG_ENABLE(quarantinedir, 
-   [  --enable-quarantinedir=DIR   Directory to keep spam and/or infected emails [/var/qmail/quarantine].],
+   [  --enable-quarantinedir=DIR       directory to keep spam and/or infected emails (default=/var/qmail/quarantine)],
    ENABLE_QUARANTINE="$enableval",
    [
       ENABLE_QUARANTINE=no
@@ -482,7 +482,7 @@ do
 done
 
 AC_ARG_ENABLE(qmail-queue,
-    [  --enable-qmail-queue=PATH   Full path to qmail-queue program.],
+    [  --enable-qmail-queue=PATH        full path to qmail-queue binary],
     qmailqueue="$enableval",
     [
         if test "$qmailqueue" = ""
@@ -499,13 +499,13 @@ AC_DEFINE_UNQUOTED(QMAILQUEUE,"$qmailqueue","qmail-queue program")
 
 ENABLE_TROPHIE=0
 AC_ARG_ENABLE(trophie-socket,
-    [  --enable-trophie-socket=PATH   Full path to the trophie socket.],
+    [  --enable-trophie-socket=PATH     full path to the trophie socket],
     [
        AC_MSG_CHECKING(whether if the trophie-socket path is set)
        trophiesocket="$enableval"
        # check for path to trophie
       AC_ARG_ENABLE(trophie-path,
-        [  --enable-trophie-path=PATH   Full path to the trophie binary.],
+        [  --enable-trophie-path=PATH       full path to the trophie binary],
         [
           trophiebinary="$enableval"
           AC_MSG_RESULT(yes)
@@ -525,7 +525,7 @@ AC_ARG_ENABLE(trophie-socket,
 
 #----------------------------------------------------------------------
 AC_ARG_ENABLE(ripmime, 
-   [  --enable-ripmime=PATH   Full path to ripmime program.],
+   [  --enable-ripmime=PATH            full path to ripmime binary],
    ENABLE_RIPMIME="$enableval",
    [
       ENABLE_RIPMIME=no
@@ -571,7 +571,7 @@ AC_DEFINE_UNQUOTED(VIRUSSCANNER, $VIRUSSCANNER, [one or more virusscanners are a
 
 #----------------------------------------------------------------------
 
-AC_ARG_ENABLE(received, [  --enable-received=y|n   Add a Received: line to the message, showing the runned scanners and some stats],
+AC_ARG_ENABLE(received, [  --enable-received=y|n            add a Received: line to the message showing the scanners ran and other stats],
     ENABLE_RECEIVED="$enableval",
     [
       ENABLE_RECEIVED=no
@@ -583,7 +583,7 @@ AC_ARG_ENABLE(received, [  --enable-received=y|n   Add a Received: line to the m
       if test $ENABLE_SPAM -eq 1; then
         SA_PATH=""
         AC_MSG_CHECKING(whether we can locate the spamassassin-path)
-        AC_ARG_ENABLE(spamassassin-path, [  --enable-spamassassin-path=PATH  Path to the spamassassin binary],
+        AC_ARG_ENABLE(spamassassin-path, [  --enable-spamassassin-path=PATH  path to the spamassassin binary],
         [
           SA_PATH="$enableval"
         ])
@@ -611,7 +611,7 @@ AC_ARG_ENABLE(received, [  --enable-received=y|n   Add a Received: line to the m
       if test $ENABLE_CLAMAV -eq 1; then
         CLAMAV_DB=""
         AC_MSG_CHECKING(whether we can locate the clamav db path)
-        AC_ARG_ENABLE(clamavdb-path, [  --enable-clamavdb-path=PATH  Directory where the clamav master.cld and daily.cld files are saved],
+        AC_ARG_ENABLE(clamavdb-path, [  --enable-clamavdb-path=PATH      directory where the clamav master.cld and daily.cld files are],
         [
           CLAMAV_DB="$enableval"
         ])
@@ -636,7 +636,7 @@ AC_ARG_ENABLE(received, [  --enable-received=y|n   Add a Received: line to the m
 #---------------
         SIGTOOL_PATH=""
         AC_MSG_CHECKING(whether we can locate the sigtool binary)
-        AC_ARG_ENABLE(sigtool-path, [  --enable-sigtool-path=PATH  Path to the sigtool binary],
+        AC_ARG_ENABLE(sigtool-path, [  --enable-sigtool-path=PATH       path to the sigtool binary],
         [
           SIGTOOL_PATH="$enableval"
         ])
@@ -689,7 +689,7 @@ AC_ARG_WITH(pcre-lib, [  --with-pcre-lib=path   path to the pcre library directo
     [])
 
 
-AC_ARG_ENABLE(regex, [  --enable-regex=y|n   enables regex scanner],
+AC_ARG_ENABLE(regex, [  --enable-regex=y|n               enables regex scanner],
     ENABLE_REGEX="$enableval",
     [
       ENABLE_REGEX=no
