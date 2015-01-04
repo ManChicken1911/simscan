@@ -1,0 +1,14 @@
+config.log
+config.h
+config.status
+stamp-h1
+Makefile
+*.a
+*.o
+cdb/compile
+cdb/load
+cdb/makelib
+cdb/systype
+cdb/uint32.h
+simscan
+simscanmk
