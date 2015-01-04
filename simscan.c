@@ -903,7 +903,7 @@ int run_ripmime()
      close(1);
      close(2);
      execl(RIPMIME, "ripmime", "--disable-qmail-bounce", 
-           "-i", message_name, "-d", NULL );
+           "-i", message_name, "-d", workdir, NULL );
      _exit(-1);
   }
 
