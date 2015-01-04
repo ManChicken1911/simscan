@@ -1,7 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 
 AC_INIT(simscan.c)
-AM_INIT_AUTOMAKE(simscan,1.4.0)
+AM_INIT_AUTOMAKE(simscan,1.4.1)
 AM_CONFIG_HEADER(config.h)
 AC_CANONICAL_HOST
 AC_CHECK_FUNCS([strsep])
@@ -611,14 +611,14 @@ AC_ARG_ENABLE(received, [  --enable-received=y|n   Add a Received: line to the m
       if test $ENABLE_CLAMAV -eq 1; then
         CLAMAV_DB=""
         AC_MSG_CHECKING(whether we can locate the clamav db path)
-        AC_ARG_ENABLE(clamavdb-path, [  --enable-clamavdb-path=PATH  Directory where the clamav master.cvd and daily.cvd files are saved],
+        AC_ARG_ENABLE(clamavdb-path, [  --enable-clamavdb-path=PATH  Directory where the clamav master.cld and daily.cld files are saved],
         [
           CLAMAV_DB="$enableval"
         ])
         clamavdb=""
         for f in "$CLAMAV_DB" /usr/local/share/clamav /var/lib/clamav
         do
-          if test -f "$f/daily.cvd"
+          if test -f "$f/daily.cld"
           then
             clamavdb=$f
             break

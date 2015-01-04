@@ -97,8 +97,8 @@ These options are only needed when the received line option (--enabled-received=
 and the corresponding scanners are enabled as well:
 
   --enable-spamassassin-path=PATH   Path to the spamassassin binary
-  --enable-clamavdb-path=PATH       Directory where the clamav master.cvd and
-                                    daily.cvd files are saved
+  --enable-clamavdb-path=PATH       Directory where the clamav master.cld and
+                                    daily.cld files are saved
   --enable-sigtool-path=PATH        Path to the sigtool binary
 
 
@@ -210,7 +210,7 @@ Below are more detailed descriptions of each configuration option.
    is only necessary if the received line option (--enable-received) is chosen.
 
 --enable-clamavdb-path=PATH
-   This option defines the full path to clamav master.cvd and daily.cvd files.
+   This option defines the full path to clamav master.cld and daily.cld files.
    This option is only necessary if the received line option (--enable-received)
    is chosen.
 

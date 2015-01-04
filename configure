@@ -879,7 +879,7 @@ Optional Features:
   --enable-ripmime=PATH   Full path to ripmime program.
   --enable-received=y|n   Add a Received: line to the message, showing the runned scanners and some stats
   --enable-spamassassin-path=PATH  Path to the spamassassin binary
-  --enable-clamavdb-path=PATH  Directory where the clamav master.cvd and daily.cvd files are saved
+  --enable-clamavdb-path=PATH  Directory where the clamav master.cld and daily.cld files are saved
   --enable-sigtool-path=PATH  Path to the sigtool binary
   --enable-regex=y|n   enables regex scanner
 
@@ -1592,7 +1592,7 @@ fi
 
 # Define the identity of the package.
  PACKAGE=simscan
- VERSION=1.4.0
+ VERSION=1.4.1
 
 
 cat >>confdefs.h <<_ACEOF
@@ -4682,7 +4682,7 @@ fi;
         clamavdb=""
         for f in "$CLAMAV_DB" /usr/local/share/clamav /var/lib/clamav
         do
-          if test -f "$f/daily.cvd"
+          if test -f "$f/daily.cld"
           then
             clamavdb=$f
             break

@@ -277,7 +277,7 @@ int make_version_cdb() {
     close(pin[0]); close(pin[1]);
   }
   strncpy(dbpath,CLAMAVDBPATH,MAX_DATA);
-  strcat(dbpath,"/main.cvd");
+  strcat(dbpath,"/main.cld");
   strcat(data,"m:");
   if (pipe(pin)){
     printf("error opening pipe for sigtool\n");
@@ -307,7 +307,7 @@ int make_version_cdb() {
     waitpid(pid,&rmstat,0);
     close(pin[0]); close(pin[1]);
     strncpy(dbpath,CLAMAVDBPATH,MAX_DATA);
-    strcat(dbpath,"/daily.cvd");
+    strcat(dbpath,"/daily.cld");
     if (pipe(pin)){
      printf("error opening pipe for sigtool\n");
     }
