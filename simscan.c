@@ -1763,6 +1763,7 @@ void per_domain_lookup( char *key )
  char *parm;
  char *val = NULL;
   
+  lowerit(key);
   if ( DebugFlag > 1 ) fprintf(stderr, "simscan: cdb looking up %s\n", key);  
 
   snprintf(tmpbuf,sizeof(tmpbuf), "%s/simcontrol.cdb", CONTROLDIR);
