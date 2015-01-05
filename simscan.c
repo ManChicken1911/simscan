@@ -1,6 +1,6 @@
 /*
- * $Id: simscan.c,v 1.67 2005/10/05 21:12:42 kbo Exp $
- * Copyright (C) 2004-2005 Inter7 Internet Technologies, Inc.
+ * simscan.c v1.68 04-Jan-2015
+ * Original Copyright (C) 2004-2005 Inter7 Internet Technologies, Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -461,13 +461,16 @@ int main(int argc, char **argv)
   }
 #endif
 
+//
+// Check for spam: DSPAM
+//
+
 #if defined(ENABLE_DSPAM)
-/* The following code is copied from the Spamassassin check below, with the proper adjustments */
 
   /* re-open the file read only */
   if ( (fd = open(message_name, O_RDONLY)) == -1 ) {
     if ( DebugFlag > 0 ) {
-      fprintf(stderr, "simscan: spam can not open file: %s\n", message_name);
+      fprintf(stderr, "simscan: dspam check cannot open file: %s\n", message_name);
     }
     exit_clean(EXIT_400);
   }
@@ -475,71 +478,68 @@ int main(int argc, char **argv)
   /* set the standard input to be the new file */
   if ( fd_move(0,fd)  == -1 ) {
     if ( DebugFlag > 0 ) {
-      fprintf(stderr, "simscan: spam could not fd_move\n");
+      fprintf(stderr, "simscan: dspam check could not fd_move\n");
     }
     exit_clean(EXIT_400);
   }
 
-  /* optionally check for spam with DSPAM */
   snprintf(spam_message_name, sizeof(spam_message_name), "spamc.msg.%s", unique_ext);
   IsSpam = 0;
   ret = check_dspam();
   switch ( ret ) {
-    /* spamassassin not enabled for this domain */
-    case 2:
-      /* re-open the message file file read only */
-      /* do nothing, message_name gets openend in any case*/
+
+    case 2:     // Message skipped for scan
       break;
 
-    /* spam detected, refuse message */
-    case 1:
+    case 1:     // Message is spam
       if ( DebugFlag > 0 ) {
-        fprintf(stderr, "simscan: DSPAM reported message as being SPAM\n");
+        fprintf(stderr, "simscan: DSPAM reported message as SPAM\n");
       }
       close(fd);
 
-#ifdef QUARANTINEDIR
+  #ifdef QUARANTINEDIR
+      /* Put message in quarantine */
       quarantine_msg(spam_message_name);
-      /* put message in quarantine */
-#endif
+  #endif
 
-#ifdef ENABLE_DROPMSG
+  #ifdef ENABLE_DROPMSG
+      /* Drop the message, returning success to sender. */
       if ( DebugFlag > 0 ) {
         fprintf(stderr, "simscan: droping the message\n");
       }
       exit_clean(EXIT_0);
-      /* Drop the message, returning success to sender. */
-#else
- #ifdef ENABLE_CUSTOM_SMTP_REJECT
+  #else
+    #ifdef ENABLE_CUSTOM_SMTP_REJECT
       snprintf(RejectMsg,sizeof(RejectMsg), "DYour email is considered spam (%.4f probability)", SpamProbability );
       write(4,RejectMsg, strlen(RejectMsg));
       exit_clean(EXIT_MSG);
- #else
+    #else
       exit_clean(EXIT_500);
- #endif
-#endif
+    #endif
+  #endif
       break;
 
-      /* dspam processed message and no spam detected */
-    case 0:
+    case 0:     // Message is innocent
         if ( DebugFlag > 0 ) {
-                fprintf(stderr, "simscan: DSPAM reported message as NOT being SPAM\n");
+                fprintf(stderr, "simscan: DSPAM reported message as INNOCENT\n");
         }
-      /* open the spam file read only */
+
       strncpy(message_name,spam_message_name,BUFFER_SIZE);
       break;
-      /* errors , return temporary error */
-    default:
+
+    default:    // All other errors
       if ( DebugFlag > 0 ) {
         fprintf(stderr, "simscan: check_dspam had an error ret: %d\n", ret);
       }
       close(fd);
       exit_clean(EXIT_400);
   }
-
 #endif
 
 
+//
+// Pull apart MIME-encoded messages for scanning
+//
 
 #if (VIRUSSCANNER==1 || ENABLE_ATTACH==1) && DO_RIPMIME==1
   /* break the email msg into mime parts */
@@ -550,6 +550,11 @@ int main(int argc, char **argv)
     exit_clean(EXIT_400);
   }
 #endif
+
+
+//
+// Check for attachments to block
+//
 
 #ifdef ENABLE_ATTACH
   /* check for attachments to block */
@@ -568,6 +573,10 @@ int main(int argc, char **argv)
   }
 #endif
 
+
+//
+// Scan for viruses: ClamAV
+//
 
 #ifdef ENABLE_CLAMAV
   /* Run ClamAntiVirus, exit on errors */ 
@@ -601,6 +610,11 @@ int main(int argc, char **argv)
       break;
   }
 #endif
+
+
+//
+// Scan for viruses: Sophos Trophie
+//
 
 #ifdef ENABLE_TROPHIE
   ret = check_trophie();
@@ -651,6 +665,11 @@ int main(int argc, char **argv)
 #endif
   }
 #endif
+
+
+//
+// Check for spam: SpamAssassin
+//
 
 #ifdef ENABLE_SPAM
   /* re-open the file read only */
@@ -764,7 +783,7 @@ int main(int argc, char **argv)
     case 0:
       close(pim[1]);
       dup2(pim[0],0);
-      execl(qmail_queue, qmail_queue, 0);
+      execl(qmail_queue, qmail_queue, NULL);
       _exit(-1);
   }
   close(pim[0]);
@@ -1050,75 +1069,65 @@ int is_clam(char *clambuf)
            <0 on errors
  */
 #if defined(ENABLE_DSPAM)
-int check_dspam()
-{
- int pid;
- int rmstat;
- int pim[2];
- int spam_fd;
- char *tmpbuf;
-FILE *spamfs;
- int i;
- int got_data;
+int check_dspam() {
 
-#ifdef ENABLE_PER_DOMAIN
-  if ( PerDomainSpam == 0 ) return(2);
-#endif
+  int pid;
+  int rmstat;
+  int pim[2];
+  int spam_fd;
+  FILE *spamfs;
+  int i;
+  int got_data;
 
-#ifndef ENABLE_SPAM_AUTH_USER
-  /* don't scan email from authenticated senders */
-  if (getenv("RELAYCLIENT")) {
-    log_message("RELAYCLIENT", "-", 0);
-    return 2;
-  }
-#endif
+  #ifdef ENABLE_PER_DOMAIN
+    if ( PerDomainSpam == 0 ) return(2);
+  #endif
+
+  #ifndef ENABLE_SPAM_AUTH_USER
+    /* don't scan email from authenticated senders */
+    if (getenv("RELAYCLIENT")) {
+      log_message("RELAYCLIENT", "-", 0);
+      return 2;
+    }
+  #endif
 
   if ( (spam_fd=open(spam_message_name, O_RDWR|O_CREAT|O_TRUNC,0644)) ==- 1) {
     if ( DebugFlag > 0 ) {
-      fprintf(stderr, "simscan: check_spam could not open spam file: %s\n",
+      fprintf(stderr, "simscan: check_dspam could not open spam file: %s\n",
         spam_message_name);
     }
     return(-1);
   }
 
-  if ( DebugFlag > 0 ) {
-    fprintf(stderr, "simscan: calling dspam\n");
-  }
-
+  /* This was stolen from the spamc code block but was
+   * never actually hooked up to do anything.
+   *
   tmpbuf = malloc(strlen(DSPAM_ARGS)+1);
   strcpy(tmpbuf, DSPAM_ARGS);
-
-  /* setup the dspam args 
-  dspam_args[0] = "dspam";
-  dspam_args[1] = "--stdout";
-  tmpstr = strtok(tmpbuf," ");
-
-  for(i=1;i<MAX_DSPAM_ARGS-1&&tmpstr!=NULL;++i,tmpstr=strtok(NULL," ")) {
-    dspam_args[i] = tmpstr;
-  }
-  */
+   *
+   */
 
   i = 0;
-  dspam_args[i++] = "dspamc";
   dspam_args[i++] = "--stdout";
   dspam_args[i++] = "--client";
-  dspam_args[i++] = "--feature=chained,noise";
-  dspam_args[i++] = "--deliver=innocent,spam";
-  dspam_args[i++] = "--debug";
+  dspam_args[i++] = "--feature=noise";
+  dspam_args[i++] = "--deliver=innocent";
 
-#ifdef ENABLE_DSPAM_USER
-  if ( MaxRcptTo==1 ) {
-    dspam_args[i++] = "--user";
-    //dspam_args[i++] = "vpopmail";
-    dspam_args[i++] = RcptTo[0];
-  } else {
+  if( DebugFlag > 2 )
+    dspam_args[i++] = "--debug";
+
+  #ifdef ENABLE_DSPAM_USER
+    if ( MaxRcptTo==1 ) {
+      dspam_args[i++] = "--user";
+      dspam_args[i++] = RcptTo[0];
+    } else {
+      dspam_args[i++] = "--user";
+      dspam_args[i++] = "vpopmail";
+    }
+  #else
     dspam_args[i++] = "--user";
     dspam_args[i++] = "vpopmail";
-  }
-#else
-  dspam_args[i++] = "--user";
-  dspam_args[i++] = "vpopmail";
-#endif
+  #endif
 
   dspam_args[i++] = NULL;
 
@@ -1137,21 +1146,21 @@ FILE *spamfs;
       case -1:
         close(pim[0]);
         close(pim[1]);
-	close(spam_fd);
+        close(spam_fd);
         return(-1);
       case 0:
         close(pim[0]);
         dup2(pim[1],1);
         close(pim[1]);
         i = execve(DSPAM, dspam_args, 0);
-	fprintf(stderr, "execve returned %d/%d\n", i, errno);
+        fprintf(stderr, "execve returned %d/%d\n", i, errno);
         _exit(-1);
     }
     close(pim[1]);
     dup2(pim[0],0);
     close(pim[0]);
   } else {
-	close(spam_fd);
+    close(spam_fd);
     return(0);
   }
 
@@ -1181,58 +1190,63 @@ FILE *spamfs;
   /* check if the child died on a signal */
   if ( WIFSIGNALED(rmstat) ) return(-1);
 
-  if ( got_data == 0 ) return(-1);
+  // Changed to reflect removing 'spam' from --deliver=innocent
+  // DSPAM only generates output if should deliver the message based on --deliver
+  // so getting no data back means the message was deemed as spam
 
-#ifdef ENABLE_SPAM_PASSTHRU
- #ifdef ENABLE_PER_DOMAIN
-    if ( PerDomainSpamPassthru == 1) {
-      if ( IsSpam == 1 ) {
-        if (DebugFlag > 0) {
-          fprintf(stderr,
-            "simscan: delivering spam because spam-passthru is defined in this domain\n");
+  if ( got_data == 0 ) {
+    if( DebugFlag > 1 )
+      fprintf(stderr, "simscan: message was a retrain or quarantined by DSPAM\n");
+    IsSpam = 1;
+  }
+
+  #ifdef ENABLE_SPAM_PASSTHRU
+    #ifdef ENABLE_PER_DOMAIN
+      if ( PerDomainSpamPassthru == 1) {
+        if ( IsSpam == 1 ) {
+          if (DebugFlag > 0) {
+            fprintf(stderr, "simscan: delivering spam because spam-passthru is defined in this domain\n");
+          }
+          log_message("PASSTHRU", Subject,1);
+        } else {
+          log_message("CLEAN", Subject,1);
         }
+        return(0);
+      } else {
+        if ( IsSpam == 1 ) {
+          #ifdef ENABLE_DROPMSG
+            log_message("SPAM DROPPED", Subject, 1);
+          #else
+            log_message("SPAM REJECT", Subject,1);
+          #endif
+          return(1);
+        } else {
+          log_message("CLEAN", Subject,1);
+        }
+      }
+    #else
+      if ( IsSpam == 1 ) {
         log_message("PASSTHRU", Subject,1);
       } else {
         log_message("CLEAN", Subject,1);
       }
       return(0);
-    } else {
-      if ( IsSpam == 1 ) {
-#ifdef ENABLE_DROPMSG
-        log_message("SPAM DROPPED", Subject, 1);
-#else
-        log_message("SPAM REJECT", Subject,1);
-#endif
-        return(1);
-      } else {
-        log_message("CLEAN", Subject,1);
-      }
-    }
- #else
+    #endif // ENABLE_PER_DOMAIN
+  #else
     if ( IsSpam == 1 ) {
-      log_message("PASSTHRU", Subject,1);
+      #ifdef ENABLE_DROPMSG
+        log_message("SPAM DROPPED", Subject, 1);
+      #else
+        log_message("SPAM REJECT", Subject,1);
+      #endif
+      return(1);
     } else {
       log_message("CLEAN", Subject,1);
     }
-    return(0);
- #endif
-#else
-  if ( IsSpam == 1 ) {
-#ifdef ENABLE_DROPMSG
-    log_message("SPAM DROPPED", Subject, 1);
-#else
-    log_message("SPAM REJECT", Subject,1);
-#endif
-    return(1);
-  } else {
-    log_message("CLEAN", Subject,1);
-  }
-#endif
-
+  #endif // ENABLE_SPAM_PASSTHRU
   return(0);
-
 }
-#endif
+#endif // ENABLE_DSPAM
 
 
 /* 
@@ -1747,7 +1761,7 @@ void per_domain_lookup( char *key )
  char tmpbuf[256];
  char *data;
  char *parm;
- char *val;
+ char *val = NULL;
   
   if ( DebugFlag > 1 ) fprintf(stderr, "simscan: cdb looking up %s\n", key);  
 
@@ -2106,7 +2120,6 @@ int check_regex () {
 }
 
 void init_regex (char *list) {
-  int len=0;
   char *found;
   if ( DebugFlag > 3 ) fprintf(stderr, "simscan: init_regex called with %s\n", list);  
   while( ( found = strsep(&list,":") ) != NULL) {
