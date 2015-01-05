@@ -2,7 +2,6 @@ config.log
 config.h
 config.status
 stamp-h1
-Makefile
 *.a
 *.o
 *~
