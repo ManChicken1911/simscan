@@ -1470,7 +1470,10 @@ void format_dir(char *workdir)
 
 /* 
  * From vpopmail source 
- * recursively remove a directory and all it's files
+ * recursively remove a directory and all its files
+ *
+ * Modified to ignore delete errors, as walking through
+ * a directory while deleting things from it is bad
  */
 int remove_files(char *dir)
 {
@@ -1537,9 +1540,10 @@ int remove_files(char *dir)
       /* the entry is not a directory, unlink it to delete */
       } else {
 
-        /* unlink the file and check for error */
+        /* unlink the file but ignore "file doesn't exist" errors */
         if (unlink(mydirent->d_name) == -1) {
-          return(-1);
+          if( errno != ENOENT )
+            return(-1);
         }
       }
     }
